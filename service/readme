@@ -1,0 +1,9 @@
+     Thanks for sharing larger item features file. I was able to load it in QA environment. Please use attached scripts to verify web service response in QA environment.  Some of the items may not have product details as they may not be available in Dev. Environment. (You can look at athcid attribute in Beacon response, to see list of product Ids recommended). Will ensure this issue is resolved when we integrate with prod. Chalet service. I need below details from your end. 
+Item features file copied to “100.65.13.246”, “100.64.14.3” data nodes in location /app/pax/data.
+Item to category mapping file copied to “100.65.13.246”, “100.64.14.3” data nodes in location /app/pax/data.
+User features integrated through regular item’s trending in club pipeline. 
+
+
+~/Documents/project/item_trending/service/run_curl_qa2.sh.athena  ~/Documents/project/item_trending/service/samsCategoryPageModuleRequest.json
+
+

@@ -1,0 +1,4 @@
+set -xv
+
+param1=$1
+curl --verbose -X POST -d "@$param1"  http://athena.qa2.walmart.com/irs-ws/hop/0.1/athenaSamsContent

@@ -1,0 +1,72 @@
+#!/bin/bash
+
+set -e
+
+PIG=/usr/bin/pig
+
+BROWSE_DIR=/user/pythia/Workspaces/SamsMEP/scs_model.db/scs_browse_model
+PURCHASE_DIR=/user/pythia/Workspaces/SamsMEP/scs_model.db/scs_purchase_model
+#DT_YESTERDAY=2016-08-01
+DT_YESTERDAY=`date -d "1 day ago" +"%Y-%m-%d"`
+DT_SNAPSHOT=$DT_YESTERDAY
+DT_1_YEAR_BACK=`date -d "1 year ago" +"%Y-%m-%d"`
+OUTPUT_DIR=/user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features
+
+
+hive -e "set hive.exec.compress.output=false;
+set hive.exec.parallel=true;
+set hive.auto.convert.join=true;
+set mapred.task.timeout 1800000
+set hive.exec.reducers.bytes.per.reducer=81920000;
+set mapreduce.job.reduces=1000;
+
+
+INSERT overwrite directory '$BROWSE_DIR' 
+SELECT          a.vid, 
+                c.mid, 
+                a.action_type, 
+                a.catalog_item_id, 
+                a.bucket, 
+                a.session_date_val 
+FROM            ( 
+                       SELECT a.vid, 
+                              a.action_type, 
+                              b.catalog_item_id AS catalog_item_id, 
+                              b.bucket, 
+                              a.session_date_val 
+                       FROM   ( 
+                                     SELECT vid, 
+                                            action_type, 
+                                            item_ids, 
+                                            session_date_val 
+                                     FROM   pythia.samsdotcom_hubble_item_action_raw lateral VIEW explode(visitor_id) vid_table AS vid
+                                     WHERE  session_date>='20150101'
+                                     AND    action_type IN ('add_to_cart', 'order', 'item_view') ) a 
+                       JOIN 
+                              ( 
+                                     SELECT * 
+                                     FROM   jli21.sams_dotcom_item_cat_bucket 
+                                     WHERE  ds = '${DT_SNAPSHOT}') b 
+                       ON     a.item_ids = b.catalog_item_id 
+                ) a 
+LEFT OUTER JOIN 
+                (SELECT vid, mid FROM jli21.sams_vid_mapping_dt WHERE dt = '${DT_SNAPSHOT}') c 
+ON              a.vid = c.vid 
+;" 1> sams_browse.log 2>&1
+
+
+###hive -hiveconf purchaseDir=$PURCHASE_DIR -hiveconf oneYrBackDate=$DT_1_YEAR_BACK -hiveconf yesterday=$DT_YESTERDAY -f sams_purchase.hql 1> sams_purchase.log 2>&1
+
+hadoop fs -test -d $OUTPUT_DIR &&  hadoop fs -rmr $OUTPUT_DIR
+
+$PIG -p INPUT_BROWSE=$BROWSE_DIR -p INPUT_PURCHASE=$PURCHASE_DIR -p TaskDir='.' -p OUTPUT=$OUTPUT_DIR -f sams_users_agg.pig  1 > sams_users_agg.log 2>&1
+
+rm -rf scs_user_features/*
+hadoop fs -get $OUTPUT_DIR/pa* scs_user_features/ 
+##scp -r ./scs_user_features app@100.65.13.246:/app/pax/data/sams_dotcom_user_feature
+##scp -r ./scs_user_features app@100.64.14.3:/app/pax/data/sams_dotcom_user_feature
+##scp -r ./scs_user_features app@100.65.13.246:/app/jli21/
+##scp -r ./scs_user_features app@100.64.14.3:/app/jli21/
+scp -r ./scs_user_features app@100.64.3.176:/app/jli21/
+
+

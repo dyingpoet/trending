@@ -1,0 +1,39 @@
+#!/bin/bash
+set -e
+
+Hive=/usr/local/bin/hive
+
+
+'2016-07-14'
+
+
+ WHERE  visit_date>='2016-04-15'
+                                        AND   visit_date<='2016-05-14'
+                                        WHERE order_date>='2016-04-15' 
+                                        AND   order_date<='2016-05-14'
+                                       WHERE  visit_date>='2016-05-15'
+                                        AND   visit_date<='2016-06-14'
+                                        WHERE order_date>='2016-05-15'
+                                        AND   order_date<='2016-06-14'
+                                       WHERE  visit_date>='2016-06-15'
+                                        AND   visit_date<='2016-07-14'
+                                        WHERE order_date>='2016-06-15'
+                                        AND   order_date<='2016-07-14'
+
+#$Hive -f item_id_deduping.hql 
+
+impression.hql
+impression_split.hql
+click.hql
+order.hql
+join.hql
+
+$Hive -f bucket_online_monthly.sql
+#$Hive -f bucket_online_monthly_rank.sql
+
+ 
+ 
+#2)  impression, click, order, join  to get all online transaction data. Note that the ‘def’ are to define tables, ‘hql’ are inserting into table, ‘sh’ for running.
+ 
+
+

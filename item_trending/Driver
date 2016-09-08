@@ -1,0 +1,44 @@
+#!/bin/bash
+
+source ~/.bashrc
+
+
+DB=jli21
+INPUT=/hive/${DB}.db/scs_model.db/scs_item_scores
+OUTPUT=/hive/${DB}.db/scs_model.db/scs_item_features
+
+PIG=/usr/bin/pig
+Hive=/usr/local/bin/hive
+Hadoop=/usr/bin/hadoop
+
+#LAST_DT=2016-07-14
+LAST_DT=`date -d "1 day ago" +"%Y-%m-%d"`
+#PREV_DT=2016-06-14
+PREV_DT=`date -d "1 month ago" +"%Y-%m-%d"`
+DECAY_DAILY=0.025
+ONLINE_WT=100
+TREND_WT=0.1
+VISIT_WT=1.8
+
+###hive -f bucket_online_monthly.hql -hiveconf online_wt=100 -hiveconf decay_daily=0.025 -hiveconf prev_dt=2016-06-14 -hiveconf last_dt=2016-07-14 1> bucket_online_monthly.log 2>&1 -v
+$Hive -f bucket_online_monthly.hql -hiveconf online_wt=$ONLINE_WT -hiveconf decay_daily=$DECAY_DAILY -hiveconf prev_dt=$PREV_DT -hiveconf last_dt=$LAST_DT 1> bucket_online_monthly.log 2>&1 -v
+
+###hive -f bucket_online_monthly_rank_production.hql -hiveconf last_dt=2016-07-14 1> bucket_online_monthly_rank_production.log 2>&1 -v
+$Hive -f bucket_online_monthly_rank_production.hql -hiveconf last_dt=$LAST_DT -hiveconf trend_wt=$TREND_WT -hiveconf visit_wt=$VISIT_WT 1> bucket_online_monthly_rank_production.log 2>&1 -v
+
+
+###hive -e "set hive.exec.compress.output=false; insert overwrite directory '/hive/jli21.db/scs_model.db/item_scores' select bucket, catalog_item_id, cat_child, 1.0 / rank_visit as score from zzhao3.sams_us_dotcom_bucket_online_weekly_rank1;"
+$Hive -e "set hive.exec.compress.output=false; insert overwrite directory '${INPUT}' select bucket, catalog_item_id, cat_child, score_5 as score from ${DB}.sams_us_dotcom_bucket_online_combined_rank where rank_5 <= 20;"
+
+$Hadoop fs -test -d $OUTPUT && hadoop fs -rmr $OUTPUT
+$PIG -p INPUT=$INPUT -p OUTPUT=$OUTPUT -f sams_item_output.pig  1 > sams_item_output.log 2>&1
+
+
+rm -rf ~/sams_dotcom_item_feature.gz
+rm -rf ~/sams_dotcom_item_feature
+$Hadoop fs -get ${OUTPUT}/part-r-00000.gz ~/sams_dotcom_item_feature.gz
+gunzip ~/sams_dotcom_item_feature.gz
+scp ~/sams_dotcom_item_feature app@100.65.13.246:/app/pax/data/sams_dotcom_item_feature
+scp ~/sams_dotcom_item_feature app@100.64.14.3:/app/pax/data/sams_dotcom_item_feature
+
+

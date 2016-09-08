@@ -1,0 +1,97 @@
+Here is the workflow of Sams Mobile module.
+ 
+1) item_id_deduping.hql for system_item_nbr to catalog_item_id mapping.
+ 
+2)  impression, click, order, join  to get all online transaction data. Note that the ‘def’ are to define tables, ‘hql’ are inserting into table, ‘sh’ for running.
+ 
+3)  bucket_online_monthly.sql to generate features for each item and bucket_online_monthly_rank.sql to generate top K products for each category. The rank_5 determines the output, and can be tuned.
+4) user_bucket.sql  add user information for personalization. The factor determined the multiplication of score in 3) and can be tuned.
+ 
+5) Human_test.Rmd is used to download and display pictures for human testing. Rank_matrix_evaluation.R evaluates the result in 3) at global level.
+
+
+
+Do you remember the condition of the optimal weights, 0*ctr_cap + 2.8*visit_norm + 0*trend_norm + 1*retail_norm, say, how to weight store vs online, how many weeks before and after?
+
+Online 100 instore 1
+1 month before 1 month after
+
+do you have the optimal weights for Online 10 instore 1
+It was 0.03,   9,   1,   0.03
+
+
+trend 0.1
+CTR 0
+visit 1.8
+retail 1
+
+result 1 [purchase coverage out of top 5 viewed/added/purchase]
+119788／660000
+
+result 2 [CTR]
+47317/8206652699 = 0.000576568%
+
+hive -f bucket_online_monthly.hql -hiveconf online_wt=100 -hiveconf decay_daily=0.025 -hiveconf prev_dt=2016-06-14 -hiveconf last_dt=2016-07-14 1> 1.log 2>&1 -v
+hive -f bucket_online_monthly_rank_production.hql -hiveconf last_dt=2016-07-14 1> 3.log 2>&1 -v
+
+
+
+
+hive -e "desc sams_us_dotcom_bucket_online_monthly;"
+bucket              	string              	                    
+cat_child           	string              	                    
+system_item_nbr     	bigint              	                    
+catalog_item_id     	string              	                    
+sum_qty             	double              	                    
+sum_decay_qty       	double              	                    
+sum_retail          	double              	                    
+sum_decay_retail    	double              	                    
+sum_visit           	double              	                    
+sum_decay_visit     	double              	                    
+sum_qty_prev        	double              	                    
+sum_visit_prev      	bigint              	                    
+sum_retail_prev     	double              	                    
+sum_sum_visit_prev  	bigint              	                    
+sum_sum_visit       	bigint            
+
+
+
+hive -e "select * from sams_us_dotcom_bucket_online_monthly limit 3"
+
+
+    We need pipeline setup to copy two files for item/product. Please let me know when pipeline is setup. I will load the data to QA and PROD. Environment. 
+Item Features Json to construct page candidates. 
+Item to category mapping for RVI. (Need sample file to build load service for item to category mapping.)
+Above files need to be copied on below data nodes:
+100.65.13.246 (DAL)
+100.64.14.3 (DFW)
+
+
+/app/pax/data
+
+hive -e "select * from sams_us_dotcom_bucket_online_combined_rank limit 5;"
+hive -e "desc sams_us_dotcom_bucket_online_combined_rank ;"
+bucket              	string              	                    
+bucket_title        	string              	                    
+cat_child           	string              	                    
+system_item_nbr     	bigint              	                    
+catalog_item_id     	string              	                    
+item_title          	string              	                    
+image_url           	string              	                    
+rank_5              	int                 	                    
+score_5             	double 
+
+
+
+
+[jli21@offers-ao00 item_trending]$ wc -l ../item_features_dummy 
+1593 ../item_features_dummy
+[jli21@offers-ao00 item_trending]$ wc -l  ~/sams_dotcom_item_feature 
+1980 /home/jli21/sams_dotcom_item_feature
+[jli21@offers-ao00 item_trending]$ ll -h ../item_features_dummy 
+-rw-r--r-- 1 jli21 jli21 9.5M Jul 25 16:05 ../item_features_dummy
+[jli21@offers-ao00 item_trending]$ ll -h  ~/sams_dotcom_item_feature 
+-rw-r--r-- 1 jli21 jli21 2.8M Aug 19 15:29 /home/jli21/sams_dotcom_item_feature
+
+
+

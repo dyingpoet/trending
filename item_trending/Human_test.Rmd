@@ -1,0 +1,64 @@
+---
+title: "Human_testing"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(plyr)
+library(dplyr)
+library(data.table)
+library(rbenchmark)
+library(bitops)
+library(jpeg)
+
+a3<- read.table("/Users/zzhao3/Documents/test1.txt", stringsAsFactors = FALSE, sep="\t", skip =0,  header = FALSE, comment.char = "",check.names = FALSE, quote="",
+                na.strings=c("NULL","NaN", " "),fill = TRUE )
+a3<-subset(a3,a3$V7!="NA")
+
+colnames (a3) <- c("bucket", "bucket.title", "cat.child", "system.item.nbr", "catalog.item.id", "image.url", "sum.retail.test", 
+          "trend.visit.test", "sum.visit.test", "impression", "click", "ctr.cap", 
+          "score1", "score2", "score3", "score4", "test1", "test2", "test3", "item.title")
+a3$combined <- 0/50 * a3$score1 + 0/50 * a3$score3 + 28/10 * a3$score2 + 1 * a3$score4
+a3 = transform(a3, combined.rank = ave( combined, bucket, FUN = function(x) rank(-x, ties.method = "first")))
+
+a4 =  a3[ which(a3$bucket %in% c(1086, 1706,1285,1286,1852,1055,1946,1444, 450203, 1585,7520117, 1929, 1888, 450193,1455,1499,1514,1529,2046,1458,2260,10230119,15720522,1559,1445,1539,1501,2075,1466,1507) & a3$combined.rank <= 10), ]
+
+newdata <- a4[order(a4$bucket, a4$combined.rank),]
+
+rownames(newdata) <- NULL
+
+```
+
+```{r run , echo=FALSE, results='asis', fig.width = 3, fig.height = 3}
+for(i in 1:300)
+{ 
+  if (newdata$combined.rank[i] == 1){
+    cat("\n\n\\pagebreak\n")
+    writeLines("\n")
+    cat(sprintf("**bucket: %s, bucket description: %s**",   
+                newdata$bucket[i],newdata$bucket.title[i]))
+  }
+  writeLines("\n")
+  tryCatch ( download.file(newdata$image.url[i],'picture', mode = 'wb'), error = function(e) {download.file("http://scene7.samsclub.com/is/image/samsclub/0007874208635_A?$img_size_211x208$",'picture', mode = 'wb')}  )
+  jj <- readJPEG('picture',native=TRUE)
+  plot(c(100, 200), c(300, 400), type = "l", ann=FALSE,axes=FALSE,xlim=c(100, 200),ylim=c(300,400))
+  rasterImage(jj, 100, 300, 200, 400, angle = 0, interpolate = FALSE)
+  
+
+  #title( xlab = sprintf("rank_visit:  %s, product ID %s",newdata$rank_visit[i], newdata$catalog_item_id[i]), cex = 0.5, font.main= 12)
+  cat(sprintf("Product    ID %s", newdata$catalog.item.id[i]))
+  writeLines("\n")
+  cat(sprintf("Item description: %s", newdata$item.title[i]))
+  
+#   cat(sprintf("Ranking_visit: **%s**, Ranking_decay_visit: **%s**, Ranking_qty: **%s**, Ranking_decay_qty: **%s**, 
+#                Ranking_retail: **%s**, Ranking_decay_retail: **%s**, Ranking_trend: **%s**",          #newdata$rank_visit[i],newdata$rank_decay_visit[i], newdata$rank_qty[i],newdata$rank_decay_qty[i], 
+#                newdata$rank_retail[i],newdata$rank_decay_retail[i],newdata$rank_trend[i]))
+  
+
+file.remove("picture")
+rm (jj)
+
+  
+}
+
+```

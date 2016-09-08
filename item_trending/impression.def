@@ -1,0 +1,30 @@
+
+USE zzhao3;
+
+CREATE TABLE IF NOT EXISTS impression(
+    b30msc string,
+    bsc string,
+    btc string,
+    vid string,
+    cid string,
+    sams_hubble_session string,
+    req_start_time string,
+    page_url string,
+    refer_url string,
+    refer_prod string,
+    impression_prod_list array<string>,
+    gpv_p6 string,
+    evar_19 string,
+    pv_id string,
+    page_type string,
+    item_ids string,
+    mapped_item_ids string,
+    uagent string,
+    athpgid string,
+    athznid string,
+    athcpid string,
+    athmtid string,
+    athtype string,
+    ts string,
+    query_string string
+)PARTITIONED BY(dt string, dthour string);

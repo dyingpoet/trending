@@ -1,0 +1,94 @@
+
+Attached to the *bfd-main* Hadoop cluster
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+
+Logging initialized using configuration in file:/etc/hive/conf.bfd-puppet/hive-log4j.properties
+Total jobs = 3
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+Execution log at: /tmp/jli21/jli21_20160802220404_eb62784a-ab2b-4a76-909a-2ad3e93b935b.log
+2016-08-02 10:04:17	Starting to launch local task to process map join;	maximum memory = 1005060096
+2016-08-02 10:04:20	Dump the side-table into file: file:/tmp/jli21/hive_2016-08-02_22-03-48_431_828225528393575064-1/-local-10005/HashTable-Stage-7/MapJoin-mapfile11--.hashtable
+2016-08-02 10:04:20	Uploaded 1 File to: file:/tmp/jli21/hive_2016-08-02_22-03-48_431_828225528393575064-1/-local-10005/HashTable-Stage-7/MapJoin-mapfile11--.hashtable (7387740 bytes)
+2016-08-02 10:04:20	End of local task; Time Taken: 3.782 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 1 out of 3
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_201607211732_646853, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201607211732_646853
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201607211732_646853
+Hadoop job information for Stage-7: number of mappers: 248; number of reducers: 0
+2016-08-02 22:07:57,706 Stage-7 map = 55%,  reduce = 0%, Cumulative CPU 2585.23 sec
+2016-08-02 22:08:06,229 Stage-7 map = 81%,  reduce = 0%, Cumulative CPU 3616.72 sec
+2016-08-02 22:08:16,986 Stage-7 map = 96%,  reduce = 0%, Cumulative CPU 5239.7 sec
+2016-08-02 22:08:32,047 Stage-7 map = 100%,  reduce = 100%, Cumulative CPU 5480.99 sec
+MapReduce Total cumulative CPU time: 0 days 1 hours 31 minutes 20 seconds 990 msec
+Ended Job = job_201607211732_646853
+Stage-8 is filtered out by condition resolver.
+Stage-2 is selected by condition resolver.
+Launching Job 2 out of 3
+Number of reduce tasks not specified. Estimated from input data size: 10
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201607211732_646982, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201607211732_646982
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201607211732_646982
+Hadoop job information for Stage-2: number of mappers: 1248; number of reducers: 10
+2016-08-02 22:09:12,809 Stage-2 map = 1%,  reduce = 0%, Cumulative CPU 65.41 sec
+2016-08-02 22:09:35,377 Stage-2 map = 68%,  reduce = 0%, Cumulative CPU 1645.59 sec
+2016-08-02 22:09:51,698 Stage-2 map = 83%,  reduce = 0%, Cumulative CPU 5863.06 sec
+2016-08-02 22:09:57,546 Stage-2 map = 98%,  reduce = 0%, Cumulative CPU 7814.27 sec
+2016-08-02 22:10:14,062 Stage-2 map = 99%,  reduce = 0%, Cumulative CPU 9882.94 sec
+2016-08-02 22:10:34,917 Stage-2 map = 99%,  reduce = 19%, Cumulative CPU 10886.8 sec
+2016-08-02 22:11:04,728 Stage-2 map = 99%,  reduce = 27%, Cumulative CPU 12509.52 sec
+2016-08-02 22:11:26,213 Stage-2 map = 100%,  reduce = 29%, Cumulative CPU 12603.44 sec
+2016-08-02 22:11:34,242 Stage-2 map = 100%,  reduce = 31%, Cumulative CPU 12603.44 sec
+2016-08-02 22:11:44,513 Stage-2 map = 100%,  reduce = 32%, Cumulative CPU 12877.99 sec
+2016-08-02 22:11:52,749 Stage-2 map = 100%,  reduce = 33%, Cumulative CPU 13288.53 sec
+2016-08-02 22:12:04,144 Stage-2 map = 100%,  reduce = 43%, Cumulative CPU 13441.13 sec
+2016-08-02 22:12:16,885 Stage-2 map = 100%,  reduce = 57%, Cumulative CPU 13441.13 sec
+2016-08-02 22:12:23,428 Stage-2 map = 100%,  reduce = 58%, Cumulative CPU 13441.13 sec
+2016-08-02 22:12:36,798 Stage-2 map = 100%,  reduce = 59%, Cumulative CPU 13441.13 sec
+2016-08-02 22:12:43,992 Stage-2 map = 100%,  reduce = 60%, Cumulative CPU 13441.13 sec
+2016-08-02 22:12:55,282 Stage-2 map = 100%,  reduce = 67%, Cumulative CPU 13849.12 sec
+2016-08-02 22:13:10,818 Stage-2 map = 100%,  reduce = 72%, Cumulative CPU 14229.69 sec
+2016-08-02 22:13:20,807 Stage-2 map = 100%,  reduce = 73%, Cumulative CPU 14229.69 sec
+2016-08-02 22:13:26,196 Stage-2 map = 100%,  reduce = 74%, Cumulative CPU 14229.69 sec
+2016-08-02 22:13:30,187 Stage-2 map = 100%,  reduce = 75%, Cumulative CPU 14229.69 sec
+2016-08-02 22:13:38,569 Stage-2 map = 100%,  reduce = 76%, Cumulative CPU 14229.69 sec
+2016-08-02 22:13:54,744 Stage-2 map = 100%,  reduce = 77%, Cumulative CPU 14462.59 sec
+2016-08-02 22:14:02,134 Stage-2 map = 100%,  reduce = 78%, Cumulative CPU 14618.48 sec
+2016-08-02 22:14:06,869 Stage-2 map = 100%,  reduce = 79%, Cumulative CPU 14977.27 sec
+2016-08-02 22:14:18,321 Stage-2 map = 100%,  reduce = 80%, Cumulative CPU 14977.27 sec
+2016-08-02 22:14:36,035 Stage-2 map = 100%,  reduce = 81%, Cumulative CPU 14977.27 sec
+2016-08-02 22:14:41,820 Stage-2 map = 100%,  reduce = 82%, Cumulative CPU 14977.27 sec
+2016-08-02 22:14:47,858 Stage-2 map = 100%,  reduce = 83%, Cumulative CPU 14977.27 sec
+2016-08-02 22:14:56,294 Stage-2 map = 100%,  reduce = 84%, Cumulative CPU 15191.85 sec
+2016-08-02 22:15:05,435 Stage-2 map = 100%,  reduce = 85%, Cumulative CPU 15393.49 sec
+2016-08-02 22:15:14,692 Stage-2 map = 100%,  reduce = 86%, Cumulative CPU 15540.38 sec
+2016-08-02 22:15:32,770 Stage-2 map = 100%,  reduce = 88%, Cumulative CPU 15625.82 sec
+2016-08-02 22:15:39,975 Stage-2 map = 100%,  reduce = 89%, Cumulative CPU 15625.82 sec
+2016-08-02 22:15:51,788 Stage-2 map = 100%,  reduce = 90%, Cumulative CPU 15750.17 sec
+2016-08-02 22:16:04,315 Stage-2 map = 100%,  reduce = 91%, Cumulative CPU 15828.55 sec
+2016-08-02 22:16:15,969 Stage-2 map = 100%,  reduce = 92%, Cumulative CPU 16171.3 sec
+2016-08-02 22:16:24,383 Stage-2 map = 100%,  reduce = 93%, Cumulative CPU 16171.3 sec
+2016-08-02 22:16:29,338 Stage-2 map = 100%,  reduce = 94%, Cumulative CPU 16171.3 sec
+2016-08-02 22:16:39,953 Stage-2 map = 100%,  reduce = 95%, Cumulative CPU 16330.9 sec
+2016-08-02 22:16:50,416 Stage-2 map = 100%,  reduce = 96%, Cumulative CPU 16425.69 sec
+2016-08-02 22:17:07,144 Stage-2 map = 100%,  reduce = 97%, Cumulative CPU 16692.65 sec
+2016-08-02 22:17:32,722 Stage-2 map = 100%,  reduce = 98%, Cumulative CPU 16785.9 sec
+2016-08-02 22:18:10,071 Stage-2 map = 100%,  reduce = 99%, Cumulative CPU 16921.17 sec
+2016-08-02 22:19:12,303 Stage-2 map = 100%,  reduce = 99%, Cumulative CPU 17080.06 sec
+2016-08-02 22:20:13,700 Stage-2 map = 100%,  reduce = 99%, Cumulative CPU 17150.91 sec
+2016-08-02 22:20:46,956 Stage-2 map = 100%,  reduce = 100%, Cumulative CPU 17244.25 sec
+MapReduce Total cumulative CPU time: 0 days 4 hours 47 minutes 24 seconds 250 msec
+Ended Job = job_201607211732_646982
+Moving data to: /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_browse_model
+MapReduce Jobs Launched: 
+Job 0: Map: 248   Cumulative CPU: 5480.99 sec   MAPRFS Read: 33905401784 MAPRFS Write: 9540603572 SUCCESS
+Job 1: Map: 1248  Reduce: 10   Cumulative CPU: 17244.25 sec   MAPRFS Read: 210121059052 MAPRFS Write: 258130668213 SUCCESS
+Total MapReduce CPU Time Spent: 0 days 6 hours 18 minutes 45 seconds 240 msec
+OK
+Time taken: 1086.153 seconds

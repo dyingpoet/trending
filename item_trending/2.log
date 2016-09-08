@@ -1,0 +1,531 @@
+
+Attached to the *bfd-main* Hadoop cluster
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+
+Logging initialized using configuration in file:/etc/hive/conf.bfd-puppet/hive-log4j.properties
+CREATE DATABASE IF NOT EXISTS jli21
+
+USE jli21
+CREATE TEMPORARY FUNCTION cast_boolean AS 'com.walmart.labs.bfd.hive.GenericUDFCastBoolean'
+
+CREATE TEMPORARY FUNCTION collect AS 'com.walmart.labs.bfd.hive.GenericUDAFCollect'
+
+CREATE TEMPORARY FUNCTION concat_array_ws AS 'com.walmart.labs.bfd.hive.GenericUDFConcatArrayWs'
+
+CREATE TEMPORARY FUNCTION condense_multi_chars AS 'com.walmart.labs.bfd.hive.GenericUDFCondenseMultiChars'
+
+CREATE TEMPORARY FUNCTION encode_newline AS 'com.walmart.labs.bfd.hive.GenericUDFEncodeNewline'
+
+CREATE TEMPORARY FUNCTION get_ngrams AS 'com.walmart.labs.bfd.hive.GenericUDFGetNgrams'
+
+CREATE TEMPORARY FUNCTION get_tweet_time AS 'com.walmart.labs.bfd.hive.GenericUDFGetTweetTime'
+
+CREATE TEMPORARY FUNCTION get_wilson_confidence_interval AS 'com.walmart.labs.bfd.hive.GenericUDFGetWilsonConfidenceInterval'
+
+CREATE TEMPORARY FUNCTION greatest_n AS 'com.walmart.labs.bfd.hive.GenericUDAFGreatestN'
+
+CREATE TEMPORARY FUNCTION is_mostly_latin AS 'com.walmart.labs.bfd.hive.GenericUDFIsMostlyLatin'
+
+CREATE TEMPORARY FUNCTION json_array_to_map AS 'com.walmart.labs.bfd.hive.GenericUDFJsonArrayToMap'
+
+CREATE TEMPORARY FUNCTION least_n AS 'com.walmart.labs.bfd.hive.GenericUDAFLeastN'
+
+CREATE TEMPORARY FUNCTION lower_bound AS 'com.walmart.labs.bfd.hive.GenericUDFLowerBound'
+
+CREATE TEMPORARY FUNCTION split_json_array AS 'com.walmart.labs.bfd.hive.GenericUDFSplitJsonArray'
+
+CREATE TEMPORARY FUNCTION xml_quote AS 'com.walmart.labs.bfd.hive.GenericUDFXmlQuote'
+
+CREATE TEMPORARY FUNCTION zscore_to_percentile AS 'com.walmart.labs.bfd.hive.GenericUDFZTable'
+
+CREATE TEMPORARY FUNCTION ngrams AS 'com.walmart.labs.bfd.hive.GenericUDAFnGrams'
+
+CREATE TEMPORARY FUNCTION eucliean_distance AS 'com.walmart.labs.bfd.hive.GenericUDFEuclideanDistance'
+
+CREATE TEMPORARY FUNCTION euclidean_distance AS 'com.walmart.labs.bfd.hive.GenericUDFEuclideanDistance'
+
+CREATE TEMPORARY FUNCTION md5 AS 'com.walmart.labs.bfd.hive.GenericUDFMD5'
+
+CREATE TEMPORARY FUNCTION auto_increment AS 'com.walmart.labs.bfd.hive.GenericUDFAutoIncrement'
+SET hive.EXEC.compress.output=false
+ADD FILE ./time_decay.py
+Added resource: ./time_decay.py
+
+
+USE jli21
+OK
+Time taken: 0.024 seconds
+
+
+
+
+DROP TABLE IF EXISTS temp_prev
+OK
+Time taken: 1.699 seconds
+
+CREATE TABLE temp_prev AS
+       SELECT system_item_nbr,
+       	      sum(day_sum_qty_1) AS day_sum_qty,
+	      sum(day_sum_retail_1) AS day_sum_retail,
+	      sum(day_sum_visit_1) AS day_sum_visit,
+	      visit_date                   
+        FROM        (
+		SELECT     system_item_nbr,
+                            sum(unit_qty)              AS day_sum_qty_1,
+                            sum(retail_all)            AS day_sum_retail_1,
+                            COUNT(DISTINCT visit_nbr, club_nbr, visit_date) AS day_sum_visit_1,
+                            visit_date
+                            FROM   (
+                                       SELECT visit_nbr,
+                                              club_nbr,
+                                              system_item_nbr,
+                                              unit_qty,
+                                              retail_all,
+                                              visit_date
+                                       FROM   sams_us_clubs.customer_club_day_item_sales
+                                       WHERE  visit_date>='2016-04-15'
+                                        AND   visit_date<='2016-05-14'
+						) a1
+		 GROUP BY   system_item_nbr,  visit_date 
+             UNION ALL
+		 SELECT     system_item_nbr,
+                            ${hiveconf:online_wt}*sum(unit_qty)              AS day_sum_qty_1,
+                            ${hiveconf:online_wt}*sum(retail_all)            AS day_sum_retail_1,
+                            ${hiveconf:online_wt}*COUNT(DISTINCT visit_nbr, visit_date) AS day_sum_visit_1,
+                            visit_date
+                            FROM   (	
+
+			    	       SELECT order_nbr AS visit_nbr,
+                                              system_item_nbr,
+                                              ordered_qty AS unit_qty,
+                                              ordered_qty * unit_retail_amt AS retail_all,
+                                              order_date AS visit_date
+                                        FROM  sams_us_dotcom.wc_dotcom_memeber_day_item_sales_auth
+                                        WHERE order_date>='2016-04-15' 
+                                        AND   order_date<='2016-05-14'
+                                                ) a2
+                 GROUP BY   system_item_nbr,  visit_date
+		 ) aa
+	  GROUP BY system_item_nbr,  visit_date
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks not specified. Estimated from input data size: 9
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_488297, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_488297
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_488297
+Hadoop job information for Stage-1: number of mappers: 47; number of reducers: 9
+2016-08-19 13:04:09,756 Stage-1 map = 21%,  reduce = 0%, Cumulative CPU 67.8 sec
+2016-08-19 13:04:18,760 Stage-1 map = 28%,  reduce = 0%, Cumulative CPU 639.76 sec
+2016-08-19 13:04:32,089 Stage-1 map = 30%,  reduce = 0%, Cumulative CPU 796.24 sec
+2016-08-19 13:05:01,811 Stage-1 map = 36%,  reduce = 0%, Cumulative CPU 1174.25 sec
+2016-08-19 13:05:37,207 Stage-1 map = 70%,  reduce = 0%, Cumulative CPU 2573.04 sec
+2016-08-19 13:06:16,323 Stage-1 map = 94%,  reduce = 0%, Cumulative CPU 3496.98 sec
+2016-08-19 13:07:05,704 Stage-1 map = 99%,  reduce = 0%, Cumulative CPU 4387.01 sec
+2016-08-19 13:07:44,370 Stage-1 map = 100%,  reduce = 22%, Cumulative CPU 4542.7 sec
+2016-08-19 13:08:19,963 Stage-1 map = 100%,  reduce = 71%, Cumulative CPU 4964.09 sec
+2016-08-19 13:08:37,356 Stage-1 map = 100%,  reduce = 78%, Cumulative CPU 5189.71 sec
+2016-08-19 13:08:48,489 Stage-1 map = 100%,  reduce = 82%, Cumulative CPU 5516.74 sec
+2016-08-19 13:09:06,097 Stage-1 map = 100%,  reduce = 86%, Cumulative CPU 5586.63 sec
+2016-08-19 13:09:21,081 Stage-1 map = 100%,  reduce = 94%, Cumulative CPU 5643.59 sec
+2016-08-19 13:09:36,253 Stage-1 map = 100%,  reduce = 98%, Cumulative CPU 6030.31 sec
+2016-08-19 13:09:57,534 Stage-1 map = 100%,  reduce = 99%, Cumulative CPU 6030.31 sec
+MapReduce Total cumulative CPU time: 0 days 1 hours 40 minutes 30 seconds 310 msec
+Ended Job = job_201608100810_488297
+Launching Job 2 out of 3
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_488550, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_488550
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_488550
+Hadoop job information for Stage-3: number of mappers: 28; number of reducers: 1
+2016-08-19 13:11:51,621 Stage-3 map = 100%,  reduce = 0%, Cumulative CPU 186.3 sec
+2016-08-19 13:12:26,897 Stage-3 map = 100%,  reduce = 100%, Cumulative CPU 186.3 sec
+MapReduce Total cumulative CPU time: 3 minutes 6 seconds 300 msec
+Ended Job = job_201608100810_488550
+Launching Job 3 out of 3
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_488624, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_488624
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_488624
+Hadoop job information for Stage-2: number of mappers: 6; number of reducers: 1
+2016-08-19 13:13:46,173 Stage-2 map = 100%,  reduce = 0%, Cumulative CPU 48.98 sec
+2016-08-19 13:14:18,640 Stage-2 map = 100%,  reduce = 84%, Cumulative CPU 63.99 sec
+MapReduce Total cumulative CPU time: 1 minutes 3 seconds 990 msec
+Ended Job = job_201608100810_488624
+Moving data to: maprfs:/hive/jli21.db/temp_prev
+MapReduce Jobs Launched: 
+Job 0: Map: 47  Reduce: 9   Cumulative CPU: 6136.4 sec   MAPRFS Read: 78659456584 MAPRFS Write: 69709986384 SUCCESS
+Job 1: Map: 28  Reduce: 1   Cumulative CPU: 213.67 sec   MAPRFS Read: 628551476 MAPRFS Write: 463293893 SUCCESS
+Job 2: Map: 6  Reduce: 1   Cumulative CPU: 63.99 sec   MAPRFS Read: 236075945 MAPRFS Write: 237792170 SUCCESS
+Total MapReduce CPU Time Spent: 0 days 1 hours 46 minutes 54 seconds 60 msec
+OK
+Time taken: 679.487 seconds
+
+
+
+DROP TABLE if exists sams_us_dotcom_bucket_online_monthly
+OK
+Time taken: 0.22 seconds
+
+CREATE TABLE sams_us_dotcom_bucket_online_monthly AS
+      SELECT * 
+      FROM
+          ( 
+           SELECT bu.bucket, bu_map.cat_child, xx.system_item_nbr, xx.catalog_item_id, xx.sum_qty, xx.sum_decay_qty, xx.sum_retail,
+                  xx.sum_decay_retail, xx.sum_visit, xx.sum_decay_visit,
+		  COALESCE( yy.sum_qty_prev, 0) AS sum_qty_prev,
+                  COALESCE( yy.sum_visit_prev, 0) AS sum_visit_prev,
+                  COALESCE( yy.sum_retail_prev, 0) AS sum_retail_prev
+		  --COALESCE( nn.sum_qty_test, 0) AS sum_qty_test,
+		  --COALESCE( nn.sum_visit_test, 0) AS sum_visit_test,
+		  --COALESCE( nn.sum_retail_test, 0) AS sum_retail_test,
+		  --impression.impression, click.click
+
+	   FROM  
+             (  SELECT system_item_nbr, catalog_item_id, SUM(day_sum_qty) as sum_qty, SUM(decay_qty) as sum_decay_qty, SUM(day_sum_retail) as sum_retail,
+	        SUM(decay_retail) as sum_decay_retail, SUM(day_sum_visit) as sum_visit, SUM(decay_visit) as sum_decay_visit
+                FROM (
+                     SELECT CAST(system_item_nbr as BIGINT) as system_item_nbr, catalog_item_id, CAST(day_sum_qty as DOUBLE) as day_sum_qty, CAST (decay_qty as DOUBLE) as decay_qty,
+	             CAST (day_sum_retail as DOUBLE) as day_sum_retail, CAST (decay_retail as DOUBLE) as decay_retail, CAST (day_sum_visit as DOUBLE) as day_sum_visit,
+	             CAST (decay_visit as DOUBLE) as decay_visit, visit_date
+	             FROM (	
+                          SELECT TRANSFORM (system_item_nbr, catalog_item_id, day_sum_qty, day_sum_retail, day_sum_visit, visit_date, now_date, lmda1, lmda2, lmda3) 
+		          USING 'python time_decay.py' as (system_item_nbr, catalog_item_id, day_sum_qty, decay_qty, day_sum_retail, decay_retail, day_sum_visit, decay_visit, visit_date)
+		          FROM  	    (
+				    SELECT     x.system_item_nbr,
+                                               x.catalog_item_id,
+					       COALESCE(a.day_sum_qty, 0) AS day_sum_qty,
+					       COALESCE(a.day_sum_retail, 0) AS day_sum_retail,
+					       COALESCE(a.day_sum_visit, 0) AS day_sum_visit,
+					       COALESCE(a.visit_date, '${hiveconf:prev_dt}') AS visit_date,
+					       '${hiveconf:prev_dt}' as now_date,
+					       '${hiveconf:decay_daily}' as lmda1,
+					       '${hiveconf:decay_daily}' as lmda2,
+					       '${hiveconf:decay_daily}' as lmda3
+                                      FROM     
+				      	       (SELECT a1.system_item_nbr     AS system_item_nbr, 
+       					       a1.catalog_item_id     AS catalog_item_id, 
+       					       a1.source_last_updated AS source_last_updated 
+					       FROM   ( 
+                			       SELECT   system_item_nbr, 
+                         		       source_last_updated, 
+                         		       Collect_set(catalog_item_id)[0] as catalog_item_id 
+                			       FROM     sams_us_dotcom.item_catalog_xref 
+                			       GROUP BY system_item_nbr, 
+                         		       source_last_updated ) A1 
+					       JOIN 
+       					       	    ( 
+                				    SELECT   system_item_nbr, 
+                         			    Max(source_last_updated) AS max_source_last_updated 
+                				    FROM     sams_us_dotcom.item_catalog_xref 
+                				    GROUP BY system_item_nbr) B1 
+						    ON     (
+              					    a1.system_item_nbr = b1.system_item_nbr 
+       						    AND    a1.source_last_updated = b1.max_source_last_updated)
+						)x    
+					LEFT JOIN							    
+				      	       temp_now a
+					ON (x.system_item_nbr = a.system_item_nbr)
+
+					)before_decay
+	  	 	   )after_decay
+	             )format
+	         GROUP BY system_item_nbr, catalog_item_id
+		 )xx		 
+		 
+		  LEFT JOIN (
+                    SELECT   system_item_nbr,
+                             SUM (day_sum_visit) AS sum_visit_prev,
+                             SUM (day_sum_qty) AS sum_qty_prev,
+                             SUM (day_sum_retail) AS sum_retail_prev
+                             FROM temp_prev
+                             GROUP BY system_item_nbr
+                             ) yy
+               ON (xx.system_item_nbr = yy.system_item_nbr)
+		 		  
+	       JOIN
+                   (SELECT catalog_item_id, bucket FROM jli21.sams_dotcom_item_cat_bucket WHERE ds ='${hiveconf:prev_dt}' )bu
+	       ON (xx.catalog_item_id = bu.catalog_item_id)
+
+	       LEFT JOIN		      
+                   (SELECT catalog_item_id, cat_parent, cat_child FROM jli21.sams_dotcom_item_cat_map WHERE ds ='${hiveconf:prev_dt}' )bu_map
+               ON (xx.catalog_item_id = bu_map.catalog_item_id and bu.bucket = bu_map.cat_parent)
+
+	 )f1	      	                 
+	       CROSS JOIN (
+                    SELECT   SUM (day_sum_visit) AS sum_sum_visit_prev
+                             FROM temp_prev
+                                                            )prev_peroid              	             
+
+	       CROSS JOIN (
+		     SELECT  SUM (day_sum_visit) AS sum_sum_visit
+                             FROM temp_now
+							    )recent_peroid
+
+Warning: Map Join MAPJOIN[288][bigTable=?] in task 'Stage-18:MAPRED' is a cross product
+Warning: Map Join MAPJOIN[192][bigTable=?] in task 'Stage-17:MAPRED' is a cross product
+Warning: Shuffle Join JOIN[68][tables = [f1, prev_peroid, recent_peroid]] in Stage 'Stage-3:MAPRED' is a cross product
+Warning: Map Join MAPJOIN[480][bigTable=?] in task 'Stage-21:MAPRED' is a cross product
+Warning: Map Join MAPJOIN[384][bigTable=?] in task 'Stage-20:MAPRED' is a cross product
+Warning: Shuffle Join JOIN[65][tables = [f1, prev_peroid]] in Stage 'Stage-2:MAPRED' is a cross product
+Total jobs = 24
+Launching Job 1 out of 24
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_488676, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_488676
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_488676
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2016-08-19 13:15:45,586 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 4.45 sec
+MapReduce Total cumulative CPU time: 4 seconds 450 msec
+Ended Job = job_201608100810_488676
+Launching Job 2 out of 24
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_488735, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_488735
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_488735
+Hadoop job information for Stage-4: number of mappers: 1; number of reducers: 1
+2016-08-19 13:16:55,578 Stage-4 map = 0%,  reduce = 0%
+2016-08-19 13:17:13,791 Stage-4 map = 100%,  reduce = 0%, Cumulative CPU 11.72 sec
+MapReduce Total cumulative CPU time: 11 seconds 720 msec
+Ended Job = job_201608100810_488735
+Launching Job 3 out of 24
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_488794, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_488794
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_488794
+Hadoop job information for Stage-8: number of mappers: 3; number of reducers: 1
+2016-08-19 13:18:39,956 Stage-8 map = 100%,  reduce = 0%, Cumulative CPU 12.74 sec
+2016-08-19 13:18:55,038 Stage-8 map = 100%,  reduce = 100%, Cumulative CPU 19.5 sec
+MapReduce Total cumulative CPU time: 19 seconds 500 msec
+Ended Job = job_201608100810_488794
+Launching Job 4 out of 24
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_488853, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_488853
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_488853
+Hadoop job information for Stage-14: number of mappers: 1; number of reducers: 1
+2016-08-19 13:20:12,028 Stage-14 map = 100%,  reduce = 0%, Cumulative CPU 7.98 sec
+2016-08-19 13:20:36,352 Stage-14 map = 100%,  reduce = 100%, Cumulative CPU 8.24 sec
+MapReduce Total cumulative CPU time: 8 seconds 240 msec
+Ended Job = job_201608100810_488853
+Launching Job 5 out of 24
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_488938, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_488938
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_488938
+Hadoop job information for Stage-15: number of mappers: 3; number of reducers: 1
+2016-08-19 13:21:56,191 Stage-15 map = 100%,  reduce = 0%, Cumulative CPU 13.8 sec
+2016-08-19 13:22:33,782 Stage-15 map = 100%,  reduce = 100%, Cumulative CPU 21.88 sec
+MapReduce Total cumulative CPU time: 21 seconds 880 msec
+Ended Job = job_201608100810_488938
+Stage-44 is selected by condition resolver.
+Stage-45 is filtered out by condition resolver.
+Stage-9 is filtered out by condition resolver.
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+Execution log at: /tmp/jli21/jli21_20160819131414_6ae0becf-1c8b-4ae3-9e5e-5558bdb26ea9.log
+2016-08-19 01:22:53	Starting to launch local task to process map join;	maximum memory = 1005060096
+2016-08-19 01:22:55	Dump the side-table into file: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10033/HashTable-Stage-32/MapJoin-mapfile91--.hashtable
+2016-08-19 01:22:55	Uploaded 1 File to: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10033/HashTable-Stage-32/MapJoin-mapfile91--.hashtable (4381752 bytes)
+2016-08-19 01:22:55	End of local task; Time Taken: 2.778 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 7 out of 24
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_201608100810_489012, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_489012
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_489012
+Hadoop job information for Stage-32: number of mappers: 1; number of reducers: 0
+2016-08-19 13:23:44,957 Stage-32 map = 100%,  reduce = 100%
+Ended Job = job_201608100810_489012
+Stage-43 is filtered out by condition resolver.
+Stage-10 is selected by condition resolver.
+Launching Job 8 out of 24
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_489059, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_489059
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_489059
+Hadoop job information for Stage-10: number of mappers: 2; number of reducers: 1
+2016-08-19 13:24:39,536 Stage-10 map = 0%,  reduce = 0%
+2016-08-19 13:24:53,139 Stage-10 map = 100%,  reduce = 0%, Cumulative CPU 30.55 sec
+2016-08-19 13:25:23,638 Stage-10 map = 100%,  reduce = 67%, Cumulative CPU 30.55 sec
+2016-08-19 13:25:45,831 Stage-10 map = 100%,  reduce = 75%, Cumulative CPU 30.55 sec
+2016-08-19 13:26:09,458 Stage-10 map = 100%,  reduce = 100%, Cumulative CPU 74.83 sec
+MapReduce Total cumulative CPU time: 1 minutes 14 seconds 830 msec
+Ended Job = job_201608100810_489059
+Launching Job 9 out of 24
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapred.reduce.tasks=<number>
+Starting Job = job_201608100810_489154, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_489154
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_489154
+Hadoop job information for Stage-11: number of mappers: 1; number of reducers: 1
+2016-08-19 13:27:11,268 Stage-11 map = 0%,  reduce = 0%, Cumulative CPU 3.01 sec
+2016-08-19 13:27:24,334 Stage-11 map = 100%,  reduce = 0%, Cumulative CPU 6.15 sec
+MapReduce Total cumulative CPU time: 6 seconds 150 msec
+Ended Job = job_201608100810_489154
+Stage-42 is selected by condition resolver.
+Stage-5 is filtered out by condition resolver.
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+Execution log at: /tmp/jli21/jli21_20160819131414_6ae0becf-1c8b-4ae3-9e5e-5558bdb26ea9.log
+2016-08-19 01:27:35	Starting to launch local task to process map join;	maximum memory = 1005060096
+2016-08-19 01:27:40	Dump the side-table into file: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10029/HashTable-Stage-28/MapJoin-mapfile71--.hashtable
+2016-08-19 01:27:41	Uploaded 1 File to: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10029/HashTable-Stage-28/MapJoin-mapfile71--.hashtable (5241786 bytes)
+2016-08-19 01:27:41	End of local task; Time Taken: 5.396 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 11 out of 24
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_201608100810_489202, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_489202
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_489202
+Hadoop job information for Stage-28: number of mappers: 1; number of reducers: 0
+2016-08-19 13:28:13,658 Stage-28 map = 0%,  reduce = 0%
+2016-08-19 13:28:24,115 Stage-28 map = 100%,  reduce = 100%, Cumulative CPU 3.29 sec
+MapReduce Total cumulative CPU time: 3 seconds 290 msec
+Ended Job = job_201608100810_489202
+Stage-40 is selected by condition resolver.
+Stage-41 is filtered out by condition resolver.
+Stage-6 is filtered out by condition resolver.
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+Execution log at: /tmp/jli21/jli21_20160819131414_6ae0becf-1c8b-4ae3-9e5e-5558bdb26ea9.log
+2016-08-19 01:28:41	Starting to launch local task to process map join;	maximum memory = 1005060096
+2016-08-19 01:28:42	Dump the hashtable into file: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10025/HashTable-Stage-25/MapJoin-mapfile51--.hashtable
+2016-08-19 01:28:42	Upload 1 File to: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10025/HashTable-Stage-25/MapJoin-mapfile51--.hashtable File size: 261
+2016-08-19 01:28:42	Dump the side-table into file: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10025/HashTable-Stage-25/MapJoin-mapfile51--.hashtable
+2016-08-19 01:28:42	Uploaded 1 File to: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10025/HashTable-Stage-25/MapJoin-mapfile51--.hashtable (260 bytes)
+2016-08-19 01:28:42	End of local task; Time Taken: 0.651 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 13 out of 24
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_201608100810_489250, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_489250
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_489250
+Hadoop job information for Stage-25: number of mappers: 1; number of reducers: 0
+2016-08-19 13:29:09,213 Stage-25 map = 0%,  reduce = 0%
+2016-08-19 13:29:17,221 Stage-25 map = 100%,  reduce = 100%, Cumulative CPU 3.52 sec
+MapReduce Total cumulative CPU time: 3 seconds 520 msec
+Ended Job = job_201608100810_489250
+Stage-39 is selected by condition resolver.
+Stage-7 is filtered out by condition resolver.
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+Execution log at: /tmp/jli21/jli21_20160819131414_6ae0becf-1c8b-4ae3-9e5e-5558bdb26ea9.log
+2016-08-19 01:29:32	Starting to launch local task to process map join;	maximum memory = 1005060096
+2016-08-19 01:29:33	Dump the hashtable into file: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10023/HashTable-Stage-23/MapJoin-mapfile41--.hashtable
+2016-08-19 01:29:33	Upload 1 File to: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10023/HashTable-Stage-23/MapJoin-mapfile41--.hashtable File size: 261
+2016-08-19 01:29:33	Dump the side-table into file: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10023/HashTable-Stage-23/MapJoin-mapfile41--.hashtable
+2016-08-19 01:29:33	Uploaded 1 File to: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10023/HashTable-Stage-23/MapJoin-mapfile41--.hashtable (260 bytes)
+2016-08-19 01:29:33	End of local task; Time Taken: 0.696 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 15 out of 24
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_201608100810_489287, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_489287
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_489287
+Hadoop job information for Stage-23: number of mappers: 1; number of reducers: 0
+2016-08-19 13:30:02,601 Stage-23 map = 0%,  reduce = 0%
+2016-08-19 13:30:07,628 Stage-23 map = 100%,  reduce = 100%, Cumulative CPU 1.42 sec
+MapReduce Total cumulative CPU time: 1 seconds 420 msec
+Ended Job = job_201608100810_489287
+Stage-37 is filtered out by condition resolver.
+Stage-38 is selected by condition resolver.
+Stage-2 is filtered out by condition resolver.
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+Execution log at: /tmp/jli21/jli21_20160819131414_6ae0becf-1c8b-4ae3-9e5e-5558bdb26ea9.log
+2016-08-19 01:30:17	Starting to launch local task to process map join;	maximum memory = 1005060096
+2016-08-19 01:30:19	Dump the side-table into file: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10021/HashTable-Stage-21/MapJoin-mapfile30--.hashtable
+2016-08-19 01:30:19	Uploaded 1 File to: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10021/HashTable-Stage-21/MapJoin-mapfile30--.hashtable (260 bytes)
+2016-08-19 01:30:19	End of local task; Time Taken: 1.455 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 17 out of 24
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_201608100810_489325, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_489325
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_489325
+Hadoop job information for Stage-21: number of mappers: 1; number of reducers: 0
+2016-08-19 13:30:38,014 Stage-21 map = 0%,  reduce = 0%
+2016-08-19 13:30:46,514 Stage-21 map = 100%,  reduce = 100%, Cumulative CPU 0.79 sec
+MapReduce Total cumulative CPU time: 790 msec
+Ended Job = job_201608100810_489325
+Stage-35 is filtered out by condition resolver.
+Stage-36 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+WARNING: org.apache.hadoop.metrics.jvm.EventCounter is deprecated. Please use org.apache.hadoop.log.metrics.EventCounter in all the log4j.properties files.
+Execution log at: /tmp/jli21/jli21_20160819131414_6ae0becf-1c8b-4ae3-9e5e-5558bdb26ea9.log
+2016-08-19 01:31:07	Starting to launch local task to process map join;	maximum memory = 1005060096
+2016-08-19 01:31:09	Dump the side-table into file: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10017/HashTable-Stage-18/MapJoin-mapfile10--.hashtable
+2016-08-19 01:31:09	Uploaded 1 File to: file:/tmp/jli21/hive_2016-08-19_13-14-26_923_5325175261369590370-1/-local-10017/HashTable-Stage-18/MapJoin-mapfile10--.hashtable (260 bytes)
+2016-08-19 01:31:09	End of local task; Time Taken: 2.437 sec.
+Execution completed successfully
+MapredLocal task succeeded
+Launching Job 19 out of 24
+Number of reduce tasks is set to 0 since there's no reduce operator
+Starting Job = job_201608100810_489375, Tracking URL = http://sv1-hp0204-01.sv.walmartlabs.com:50030/jobdetails.jsp?jobid=job_201608100810_489375
+Kill Command = /opt/mapr/hadoop/hadoop-0.20.2/bin/../bin/hadoop job  -kill job_201608100810_489375
+Hadoop job information for Stage-18: number of mappers: 1; number of reducers: 0
+2016-08-19 13:31:54,569 Stage-18 map = 100%,  reduce = 100%, Cumulative CPU 0.89 sec
+MapReduce Total cumulative CPU time: 890 msec
+Ended Job = job_201608100810_489375
+Moving data to: maprfs:/hive/jli21.db/sams_us_dotcom_bucket_online_monthly
+MapReduce Jobs Launched: 
+Job 0: Map: 1  Reduce: 1   Cumulative CPU: 6.43 sec   MAPRFS Read: 33349193 MAPRFS Write: 297 SUCCESS
+Job 1: Map: 1  Reduce: 1   Cumulative CPU: 15.82 sec   MAPRFS Read: 43323157 MAPRFS Write: 11991601 SUCCESS
+Job 2: Map: 3  Reduce: 1   Cumulative CPU: 19.5 sec   MAPRFS Read: 10257363 MAPRFS Write: 8686073 SUCCESS
+Job 3: Map: 1  Reduce: 1   Cumulative CPU: 9.63 sec   MAPRFS Read: 35255114 MAPRFS Write: 297 SUCCESS
+Job 4: Map: 3  Reduce: 1   Cumulative CPU: 21.88 sec   MAPRFS Read: 14762633 MAPRFS Write: 13818718 SUCCESS
+Job 5: Map: 1   Cumulative CPU: 5.24 sec   MAPRFS Read: 1624963 MAPRFS Write: 1159905 SUCCESS
+Job 6: Map: 2  Reduce: 1   Cumulative CPU: 99.14 sec   MAPRFS Read: 238675056 MAPRFS Write: 205610789 SUCCESS
+Job 7: Map: 1  Reduce: 1   Cumulative CPU: 6.15 sec   MAPRFS Read: 22759476 MAPRFS Write: 22181124 SUCCESS
+Job 8: Map: 1   Cumulative CPU: 3.29 sec   MAPRFS Read: 2773505 MAPRFS Write: 3388764 SUCCESS
+Job 9: Map: 1   Cumulative CPU: 3.52 sec   MAPRFS Read: 3389161 MAPRFS Write: 138 SUCCESS
+Job 10: Map: 1   Cumulative CPU: 1.42 sec   MAPRFS Read: 535 MAPRFS Write: 138 SUCCESS
+Job 11: Map: 1   Cumulative CPU: 0.79 sec   MAPRFS Read: 616 MAPRFS Write: 138 SUCCESS
+Job 12: Map: 1   Cumulative CPU: 0.89 sec   MAPRFS Read: 616 MAPRFS Write: 129 SUCCESS
+Total MapReduce CPU Time Spent: 3 minutes 13 seconds 700 msec
+OK
+Time taken: 1058.608 seconds

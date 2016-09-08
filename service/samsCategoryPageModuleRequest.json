@@ -1,0 +1,31 @@
+{
+
+  "reqId": "02e0741-8f62-4649-9f94-6e5c3102dca5",
+  "pageType": "categorypage",
+  "pageId": "",
+  "tenant": "samsclub.com",
+  "dataInput": {
+    "clubNbr": "0000",
+    "categoryId" : "1006",
+    "productDetail" : "true",
+    "mbrShpNbr": "12345678901011"
+  },
+  "userClientInfo": {
+    "deviceType": "DEFAULT",
+    "callType": "CLIENT",
+    "userAgent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36",
+    "ipAddress": "111.11.111.111"
+  },
+  "userReqInfo": {
+    "cookieMap": {
+      "vtc": "116337",
+      "samsHubbleSession": "D6BB511BB7ABD293DD03CD509CDEC019.4108-estore04"
+    }
+  },
+  "modules": [
+    {
+      "moduleType": "TrendingItemsInCat",
+      "zone": "categorypage_TrendingItemsInCat"
+    }
+  ]
+}

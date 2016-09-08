@@ -1,0 +1,17 @@
+[jli21@offers-ao00 production_online_only]$ hd -ls /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features | head
+
+Found 15 items
+-rwxr-xr-x   3 jli21 jli21         38 2016-08-08 16:37 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/.pig_header
+-rwxr-xr-x   3 jli21 jli21       1267 2016-08-08 16:37 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/.pig_schema
+-rwxr-xr-x   3 jli21 jli21          0 2016-08-08 16:37 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/_SUCCESS
+drwxr-xr-x   - jli21 jli21          1 2016-08-08 16:40 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/_logs
+-rwxr-xr-x   3 jli21 jli21  248529107 2016-08-08 16:35 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/part-r-00000.gz
+-rwxr-xr-x   3 jli21 jli21  247620782 2016-08-08 16:35 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/part-r-00001.gz
+-rwxr-xr-x   3 jli21 jli21  248049442 2016-08-08 16:32 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/part-r-00002.gz
+-rwxr-xr-x   3 jli21 jli21  248728699 2016-08-08 16:32 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/part-r-00003.gz
+-rwxr-xr-x   3 jli21 jli21  248670391 2016-08-08 16:36 /user/pythia/Workspaces/SamsMEP/scs_model.db/scs_user_features/part-r-00004.gz
+
+{"visitor_id":"21094","user_hist_session_features":[{"start_epoch":"1420185600000","cat_features":[{"S7a::id":"2110101","S7a::views":3,"S7a::add_to_carts":1,"S7a::transactions":0},{"S7a::id":"0","S7a::views":3,"S7a::add_to_carts":1,"S7a::transactions":0},{"S7a::id":"8003","S7a::views":3,"S7a::add_to_carts":1,"S7a::transactions":0}]}]}
+
+
+
